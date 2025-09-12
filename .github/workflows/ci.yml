@@ -71,13 +71,7 @@ jobs:
 
       - name: add record test
         run: |
-          curl -X POST http://localhost:8000/ingest \ 
-            -H 'Content-Type: application/json' \ 
-            -d '{ 
-              "device_id": "dev-123", 
-              "timestamp": "2025-09-09T17:00:00Z", 
-              "data_payload": { "gene_count": 12, "sample_quality": 0.98 }
-            }'
+          curl -X POST http://localhost:8000/ingest -H 'Content-Type: application/json' -d '{ "device_id": "dev-123", "timestamp": "2025-09-09T17:00:00Z", "data_payload": { "gene_count": 12, "sample_quality": 0.98 }}'
 
       - name: Smoke test records endpoint
         run: |
