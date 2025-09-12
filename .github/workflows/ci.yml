@@ -46,6 +46,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false              # we’re just testing build; no push
+          load: true
           tags: app:ci
 
       - name: Run container
