@@ -15,10 +15,12 @@ On the other side, each machine endpoint could then report their records to some
 ### Single Machine (Vertical Scaling)
 If all records are being reported to a single machine, then there is more work to be done. 
 
-If the machine were to become overburdened, this can lead to failed requests and retries, and eventual cascaded failers. A classic solution to this problem is to implement exponential backoff, where reporting machines delay subsequent reports exponentially on incurring consecutive failures.  
+If the machine were to become overburdened, this can lead to failed requests and retries, and eventual cascaded failures. A classic solution to this problem is to implement exponential backoff, where reporting machines delay subsequent reports exponentially on incurring repeated failures.  
 
 ## A Note about DoS
+In a system like this, an immediate concern to security and availability would be denial of service (DoS) attacks. This could be mounted by an adversary by simply flooding reports to the endpoint with the intention of overloading it leading to service failure and preventing genuine reports from being processed. 
 
+While this is a natural concern it is also easily mitigated. Permissioned access to the system via tokenized access is an elegant solution. However, it is more likely that a permissioned network, one not accessible to users not on it, would also be both stronger and simpler. It is a typical solution within the manufacturing industry hoping to achieve the same architecture/goals.
 
 ## Observability
 
