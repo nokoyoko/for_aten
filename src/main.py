@@ -4,10 +4,24 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
+DB_PATH_BUFF = "buffer.db"
 DB_PATH = "records.db"
 
 # table initialization
 # for now assume that all fields are exactly those given in the sample
+with sqlite3.connect(DB_PATH_BUFF) as conn_buff:
+    conn_buff.execute(
+        """
+        CREATE TABLE IF NOT EXISTS buffer_db (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            gene_count INT NOT NULL, 
+            sample_quality REAL NOT NULL
+        )
+        """
+    )
+
 with sqlite3.connect(DB_PATH) as conn:
     conn.execute(
         """
@@ -16,7 +30,7 @@ with sqlite3.connect(DB_PATH) as conn:
             device_id TEXT NOT NULL,
             timestamp TEXT NOT NULL,
             gene_count INT NOT NULL, 
-            sample_quality DECIMAL NOT NULL
+            sample_quality REAL NOT NULL
         )
         """
     )
@@ -90,13 +104,35 @@ def add_record():
     if not check_safe_sql(record):
         return jsonify({"error": "Translation to SQL spotted potentially malicious code"}), 400
 
-    # add record to SQL database
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
-            "INSERT INTO recordings(device_id, timestamp, gene_count, sample_quality) VALUES (?, ?, ?, ?)", 
+    # store valid records in a SQL db(acting as a buffer) before pushing to main db
+    with sqlite3.connect(DB_PATH_BUFF) as conn_buff:
+        conn_buff.execute(
+            "INSERT INTO buffer_db(device_id, timestamp, gene_count, sample_quality) VALUES (?, ?, ?, ?)", 
             (device_id, timestamp, gene_count, sample_quality),
         )
+        # check the size and merge if appropriate
+        cursor = conn_buff.cursor()
+        rows = cursor.execute(
+            "SELECT device_id, timestamp, gene_count, sample_quality FROM buffer_db"
+        ).fetchall()
+        size = len(rows)
+
+        if size % 2 == 0:
+            with sqlite3.connect(DB_PATH) as dest_conn:
+                dest_conn.executemany(
+                    "INSERT INTO recordings(device_id, timestamp, gene_count, sample_quality) VALUES (?, ?, ?, ?)", 
+                    rows,
+                )
+            conn_buff.execute("DELETE FROM buffer_db")
+    
     return jsonify({"status": "ok"}), 201
+
+@app.get("/check-buffer")
+def list_records_buff():
+    with sqlite3.connect(DB_PATH_BUFF) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT * from buffer_db ORDER BY id").fetchall()
+    return jsonify([dict(row) for row in rows])  
 
 @app.get("/records")
 def list_records():
