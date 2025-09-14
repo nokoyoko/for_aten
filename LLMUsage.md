@@ -1,14 +1,16 @@
 # LLM Usage Disclosure
 
 ## Prompt 1 
-**Input:** Skeleton code for API endpoint to handle POST requests from devices, ingest them, and add them to a SQL database. 
+### Input 
+Skeleton code for API endpoint to handle POST requests from devices, ingest them, and add them to a SQL database. 
 
 --Terminated to refactor--
 
 ## Prompt 2 
-**Input:** Please generate skeleton code for API endpoint to handle POST requests from devices, ingest them, and add them to a SQL database. Particularly, please generate it in python using flask.
+### Input 
+Please generate skeleton code for API endpoint to handle POST requests from devices, ingest them, and add them to a SQL database. Particularly, please generate it in python using flask.
 
-**Response:**
+### Response
 ```python
 # app.py — ultra-minimal skeleton
 from flask import Flask, request, jsonify
@@ -82,9 +84,10 @@ Want me to tailor the model fields to your exact device payload, add Pydantic va
 **NOTE:** ^ Didn't use this at all.
 
 ## Prompt 3 
-**Input:** When I said 'skeleton' I really meant skeleton.
+### Input 
+When I said 'skeleton' I really meant skeleton.
 
-**Response:**
+### Response
 ```python
 # app.py — ultra-minimal skeleton
 from flask import Flask, request, jsonify
@@ -148,7 +151,8 @@ Got it — I stripped it down to a true skeleton in the canvas:
 If you want it even barer (e.g., no /health, or using SQLAlchemy instead of sqlite3), say the word.
 
 ## Prompt 4
-**Input:** When I wrote up my own version and ran the curl request, I got an error "add_record
+### Input 
+When I wrote up my own version and ran the curl request, I got an error "add_record
     if not request.is_json():
            ~~~~~~~~~~~~~~~^^
 TypeError: 'bool' object is not callable" 
@@ -248,7 +252,7 @@ if __name__ == "__main__":
     #serve(app, host="0.0.0.0", port=8000)
 ```
 
-**Response:**
+### Response
 You’re tripping on a tiny Flask-ism:
 	•	request.is_json is a boolean property, not a function.
 So use if not request.is_json: (no parentheses). Calling it causes TypeError: 'bool' object is not callable.
@@ -320,9 +324,10 @@ A few extra notes:
 	•	If you switch to waitress, comment out app.run(...) and use serve(app, host="0.0.0.0", port=8000) instead.
 
 ## Prompt 5
-**Input:** okay, great. Now write a curl command to print the database so I may ensure it is being updated and structure properly
+### Input 
+okay, great. Now write a curl command to print the database so I may ensure it is being updated and structure properly
 
-**Response:**
+### Response
 Good question — you won’t be able to “print the database” with curl unless your Flask app exposes a route that reads it. Right now you only have /ingest and /.
 
 Here’s a simple read-all endpoint you can add:
@@ -348,7 +353,8 @@ That will dump all rows in your recordings table as JSON so you can check struct
 Want me to show you how to make the /records endpoint filter by device_id or limit results for sanity?
 
 ## Prompt 6
-**Input:** Okay, they are indeed being recorded as evidenced by the ouput of the above command and accessing /records in the browser. However it does look something like this:
+### Input 
+Okay, they are indeed being recorded as evidenced by the ouput of the above command and accessing /records in the browser. However it does look something like this:
 0	
 device_id	"dev-123"
 gene_count	12
@@ -368,7 +374,7 @@ In the JSON and
 Does that structure look correct to you?
 
 If I remember correclt this response went basically unused, I just needed a sanity check:
-**Response:**
+### Response
 Short answer: the JSON structure is fine (array of row-objects), but the empty device_id in row 2 is a bug. Your current validation allows an empty string.
 
 Why it happened
@@ -465,7 +471,7 @@ Optional: idempotency & types
 Once you apply the checks, hit /records again—entries with empty device_id should be blocked going forward (and you can purge the existing bad rows with a simple DELETE FROM recordings WHERE trim(device_id) = '';).
 
 ## Prompt 7
-**Input:**
+### Input
 Okay, so I've been trying to induce a DROP TABLES style injection into my code for a while because I was intending to build out a special function to detect for malicious input for the SQL gneration portion of the code. Please recall my code:
 ```python
 from flask import Flask, request, jsonify
@@ -582,7 +588,7 @@ Now, I cannot seem to get much to work. Is the SQL just properly parametirized w
 
 If I remember correctly, this was also primarily sanity checking. I don't think I used much of anything from this output. 
 
-**Response:**
+### Response
 You’re not missing anything: with the code you’ve shown, a classic DROP TABLE-style SQL injection via the request body is not possible.
 
 Why:
@@ -630,7 +636,7 @@ So, with your current insert and select patterns, you won’t be able to trigger
 If you want, I can show a tiny “attack attempt” curl body you can send that would fail to drop the table but will insert the literal text so you can see it’s safe.
 
 ## Prompt 8
-**Input:**
+### Input
 Currently I have the following:
 Dockerfile
 requirements.txt
@@ -917,7 +923,7 @@ Run 'docker run --help' for more information
 Error: Process completed with exit code 125.
 0s
 
-**Response:**
+### Response
 Good catch — this is a classic Buildx gotcha.
 
 Why it failed:
@@ -947,7 +953,7 @@ will now work because app:ci exists locally.
 If you ever switch to pushing instead of running locally, use push: true (and remove load: true), then docker run would need to pull from your registry. For CI smoke tests, load: true is the right choice.
 
 ## Prompt 9
-**Input:**
+### Input
 Hello. I have been working with some code and have encountered a bug which I am having trouble resolving. Here is the source code:
 ```python
 from flask import Flask, request, jsonify
@@ -1156,7 +1162,7 @@ Yields:
 
 So clearly the buffer_db receives both records, but only one is being copied over. Note that the flush does occur and empty the buffer_db though. 
 
-**Response:**
+### Response
 You found a classic SQLite transaction visibility issue.
 
 What’s happening
@@ -1256,7 +1262,7 @@ Extra sanity checks (optional)
 	•	Use REAL instead of DECIMAL in SQLite (SQLite treats DECIMAL with numeric affinity anyway).
 
 ## Prompt 10
-**Input:**
+### Input
 Okay, great. That is much cleaner. I implemented the final version you showed me and it is functioning just fine. One other thing is I would like to add a test to the ci.yml file, code follows:
 ```yaml
 name: CI
@@ -1345,7 +1351,7 @@ jobs:
 ```
 Now, if you could provide another test for me to check that when we add two records that they get pushed to the "master" recordings db, and that the buffer_db are emptied. I guess this sort of subsumes the pre-existing "add a record" test, so that one can probably simply be replaced if this is implemented. 
 
-**Response:**
+### Response
 Nice—since your buffer flush happens when the count is even, we can assert:
 	•	after posting two records:
 	•	/records has 2 rows (migrated to master DB)
@@ -1427,7 +1433,7 @@ Run set -euo pipefail
 Error: Process completed with exit code 127.
 ```
 
-**Response:**
+### Response
 Your script failed due to Bash syntax issues:
 	•	In Bash, no spaces around = on assignment.
 	•	[ tests need spaces before ] and around operators.
@@ -1500,9 +1506,11 @@ If you prefer fewer quoting headaches, you can also use heredocs:
 Either version will make the job green and actually assert the merge + buffer flush behavior.
 
 ## Prompt 12
-**Input:** Ah of course.. :facepalm:
+### Input 
+Ah of course.. :facepalm:
 
-**Response:** Happens to all of us 🙂 Bash’s “no spaces around =” rule trips up even seasoned folks. The good news: your workflow logic was solid — just the syntax got in the way.
+### Response 
+Happens to all of us 🙂 Bash’s “no spaces around =” rule trips up even seasoned folks. The good news: your workflow logic was solid — just the syntax got in the way.
 
 Now that the assignments are fixed, your CI will actually post two records, verify they flush to the master DB, and confirm the buffer is empty 🎉
 
