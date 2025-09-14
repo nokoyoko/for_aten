@@ -6,6 +6,7 @@ from datetime import datetime
 app = Flask(__name__)
 DB_PATH_BUFF = "buffer.db"
 DB_PATH = "records.db"
+DB_PATH_DEEP = "deep_records.db"
 
 # table initialization
 # for now assume that all fields are exactly those given in the sample
@@ -34,6 +35,19 @@ with sqlite3.connect(DB_PATH) as conn:
         )
         """
     )
+
+with sqlite3.connect(DB_PATH_DEEP) as conn_deep:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS recordings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            gene_count INT NOT NULL, 
+            sample_quality REAL NOT NULL
+        )
+        """
+    )   
 
 # ensures proper formatting of the record submitted
 # return True if formatted properly, False otherwise 
@@ -124,7 +138,7 @@ def add_record():
                     rows,
                 )
             conn_buff.execute("DELETE FROM buffer_db")
-    
+
     return jsonify({"status": "ok"}), 201
 
 @app.get("/check-buffer")
