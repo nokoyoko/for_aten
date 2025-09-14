@@ -36,19 +36,6 @@ with sqlite3.connect(DB_PATH) as conn:
         """
     )
 
-with sqlite3.connect(DB_PATH_DEEP) as conn_deep:
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS recordings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            device_id TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            gene_count INT NOT NULL, 
-            sample_quality REAL NOT NULL
-        )
-        """
-    )   
-
 # ensures proper formatting of the record submitted
 # return True if formatted properly, False otherwise 
 def check_format(record):
