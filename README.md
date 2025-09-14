@@ -1,6 +1,47 @@
 # README
 
-readme things here
+## Running the Service
+
+### Locally
+To run the service locally, first make the virtual environment:
+```bash
+    python3 -m venv venv
+```
+Then, activate it:
+```bash
+    source venv/bin/activate
+```
+Once inside the vitual environment, start the endpoint by the following:
+```bash
+    python3 main.py
+```
+You may then issue commands to add records:
+```bash
+curl -X POST http://localhost:8000/ingest \       
+  -H 'Content-Type: application/json' \
+  -d '{
+    "device_id": "dev-2",
+    "timestamp": "2025-09-09T17:00:00Z",
+    "data_payload": { "gene_count": 12, "sample_quality": 0.98 }
+```
+As well as check the contentd of the *buffer_db* of *recordings* databases via (resp):
+```bash
+    curl -s http://localhost:8000/check-buffer | jq .
+```
+```bash
+    curl -s http://localhost:8000/records | jq .
+```
+
+### Docker
+To run the service via docker, first build it:
+```bash
+    docker build -t tester .
+```
+Then run it:
+```bash
+    docker run -p 8000:8000 tester 
+```
+From which point one may interact with it with identical curl commands as in the local running. 
 
 ## Scalability Strategy
 To address scalability, it is first important to consider if the entire service is being handled by multiple machines or a single machine. This is relevant as the solution space changes considerably
